@@ -46,7 +46,8 @@ var browserFetcher = new BrowserFetcher();
 await browserFetcher.DownloadAsync();
 var browser = await Puppeteer.LaunchAsync(new LaunchOptions
 {
-    Headless = false
+    Headless = false,
+    ExecutablePath = @"C:\Program Files\Google\Chrome\Application\chrome.exe"
 });
 var page = await browser.NewPageAsync();
 await page.GoToAsync(url);
