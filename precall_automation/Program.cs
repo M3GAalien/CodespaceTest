@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using PuppeteerSharp;
 
 bool debug = true;
 Console.WriteLine("Enter your name");
@@ -29,13 +30,33 @@ do
     }
 } while (readAgain);
 
+// Get infor from Gaiia
 
-string url = "https://app.gaiia.com/iq-fiber/accounts/";
-string chrome = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
-for(int i = 0; i < data.Count(); i++)
+// string url = "https://app.gaiia.com/iq-fiber/accounts/";
+// string chrome = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
+// for(int i = 0; i < data.Count(); i++)
+// {
+//     Process.Start(chrome, $"--net-tab {url + data[i].AccountNumber}");
+// }
+
+var browserFetcher = new BrowserFetcher();
+await browserFetcher.DownloadAsync();
+
+var url = "https://www.google.com/";
+var file = ".\\somepage.jpg";
+
+var launchOptions = new LaunchOptions()
 {
-    Process.Start(chrome, $"--net-tab {url + data[i].AccountNumber}");
+    Headless = false
+};
+
+using (var browser = await Puppeteer.LaunchAsync(launchOptions))
+using (var page = await browser.NewPageAsync())
+{
+    await page.GoToAsync(url);
+    await page.ScreenshotAsync(file);
 }
+
 
 
 Console.WriteLine("Data Entered:");
@@ -43,4 +64,7 @@ foreach (UserAccount u in data)
 {
     Console.WriteLine(u);
 }
+
+Console.WriteLine("Press enter to exit");
+Console.ReadLine();
 
