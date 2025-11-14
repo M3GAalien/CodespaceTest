@@ -14,3 +14,11 @@
 /workspaces/CodespaceTest/precall_automation/obj/Debug/net8.0/precall_automation.genruntimeconfig.cache
 /workspaces/CodespaceTest/precall_automation/obj/Debug/net8.0/ref/precall_automation.dll
 /workspaces/CodespaceTest/precall_automation/obj/Debug/net8.0/precall_automation.csproj.AssemblyReference.cache
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.dll
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/Microsoft.Extensions.Logging.dll
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
+/workspaces/CodespaceTest/precall_automation/bin/Debug/net8.0/PuppeteerSharp.dll
+/workspaces/CodespaceTest/precall_automation/obj/Debug/net8.0/precall_.95B3AA1B.Up2Date

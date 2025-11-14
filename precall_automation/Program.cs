@@ -39,23 +39,18 @@ do
 //     Process.Start(chrome, $"--net-tab {url + data[i].AccountNumber}");
 // }
 
+string url = "http://www.google.com";
+string file = "outputFile.txt";
+
 var browserFetcher = new BrowserFetcher();
 await browserFetcher.DownloadAsync();
-
-var url = "https://www.google.com/";
-var file = ".\\somepage.jpg";
-
-var launchOptions = new LaunchOptions()
+var browser = await Puppeteer.LaunchAsync(new LaunchOptions
 {
     Headless = false
-};
-
-using (var browser = await Puppeteer.LaunchAsync(launchOptions))
-using (var page = await browser.NewPageAsync())
-{
-    await page.GoToAsync(url);
-    await page.ScreenshotAsync(file);
-}
+});
+var page = await browser.NewPageAsync();
+await page.GoToAsync(url);
+await page.ScreenshotAsync(file);
 
 
 
