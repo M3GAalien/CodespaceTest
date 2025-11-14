@@ -185,3 +185,10 @@
 /workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/mscordbi.dll
 /workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/mscorrc.dll
 /workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/msquic.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/Microsoft.Extensions.DependencyInjection.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/Microsoft.Extensions.Logging.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/Microsoft.Extensions.Logging.Abstractions.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/Microsoft.Extensions.Options.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/Microsoft.Extensions.Primitives.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/publish/PuppeteerSharp.dll

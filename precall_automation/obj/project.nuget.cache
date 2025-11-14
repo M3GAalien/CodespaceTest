@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "YcJWXC/Ob/I=",
+  "dgSpecHash": "dRcewOOFljo=",
   "success": true,
   "projectFilePath": "/workspaces/CodespaceTest/precall_automation/precall_automation.csproj",
   "expectedPackageFiles": [
@@ -11,9 +11,9 @@
     "/home/codespace/.nuget/packages/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg.sha512",
     "/home/codespace/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "/home/codespace/.nuget/packages/puppeteersharp/20.2.4/puppeteersharp.20.2.4.nupkg.sha512",
-    "/home/codespace/.nuget/packages/microsoft.netcore.app.runtime.linux-x64/8.0.21/microsoft.netcore.app.runtime.linux-x64.8.0.21.nupkg.sha512",
-    "/home/codespace/.nuget/packages/microsoft.aspnetcore.app.runtime.linux-x64/8.0.21/microsoft.aspnetcore.app.runtime.linux-x64.8.0.21.nupkg.sha512",
-    "/home/codespace/.nuget/packages/microsoft.netcore.app.crossgen2.linux-x64/8.0.21/microsoft.netcore.app.crossgen2.linux-x64.8.0.21.nupkg.sha512"
+    "/home/codespace/.nuget/packages/microsoft.netcore.app.runtime.win-x64/8.0.21/microsoft.netcore.app.runtime.win-x64.8.0.21.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.aspnetcore.app.runtime.win-x64/8.0.21/microsoft.aspnetcore.app.runtime.win-x64.8.0.21.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.netcore.app.host.win-x64/8.0.21/microsoft.netcore.app.host.win-x64.8.0.21.nupkg.sha512"
   ],
   "logs": []
 }

@@ -197,3 +197,10 @@
 /workspaces/CodespaceTest/precall_automation/obj/Release/net8.0/win-x64/ref/precall_automation.dll
 /workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.2125.47513.dll
 /workspaces/CodespaceTest/precall_automation/obj/Release/net8.0/win-x64/precall_automation.csproj.AssemblyReference.cache
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/Microsoft.Extensions.DependencyInjection.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/Microsoft.Extensions.Logging.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/Microsoft.Extensions.Logging.Abstractions.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/Microsoft.Extensions.Options.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/Microsoft.Extensions.Primitives.dll
+/workspaces/CodespaceTest/precall_automation/bin/Release/net8.0/win-x64/PuppeteerSharp.dll
