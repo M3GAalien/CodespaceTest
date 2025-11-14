@@ -21,7 +21,7 @@ do
         }
         catch (Exception e)
         {
-            Console.WriteLine("Oopsie Poopsie");
+            Console.WriteLine("Oopsie Poopsie: " + e.Message);
         }
     }
     else
