@@ -14,6 +14,8 @@ string option = choice == 1 ? """customTypeIds"%3A%5B"6421ab73-c467-4f79-ac17-ba
 Process.Start(new ProcessStartInfo
 {
     FileName = url + option,
+    UseShellExecute = true,
+    Verb = "open"
 });
 
 Console.ReadLine();
