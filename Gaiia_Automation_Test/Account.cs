@@ -16,11 +16,35 @@ public class Account
         PhoneNumber = accountInfo[3];
         Subsciption = accountInfo[4];
         Address = accountInfo[5];
-        InstallTime = accountInfo[6];
+        InstallTime = reformatInstallTime(accountInfo[6]);
     }
 
     public override string ToString()
     {
         return $"{AccountNumber} {FirstName} {LastName} {PhoneNumber} {Subsciption} {Address} {InstallTime}";
+    }
+
+    private string reformatInstallTime(string installTime)
+    {
+        DateTime start = DateTime.Parse(installTime);
+        DateTime end = start.AddHours(3);
+
+        // Build formatted string
+        string dayOfWeek = start.ToString("dddd");
+        string month = start.ToString("MMM");
+        string day = GetOrdinal(start.Day);
+
+        string startTime = start.ToString("h:mmtt").ToLower();
+        string endTime = end.ToString("h:mmtt").ToLower();
+
+        return $"{dayOfWeek} {month}. {day}, {startTime} - {endTime}";
+    }
+
+    private string GetOrdinal(int day)
+    {
+        if (day % 10 == 1 && day != 11) return day + "st";
+        if (day % 10 == 2 && day != 12) return day + "nd";
+        if (day % 10 == 3 && day != 13) return day + "rd";
+        return day + "th";
     }
 }

@@ -1,7 +1,7 @@
 ﻿using TextCopy;
 
 
-bool debug = true;
+bool debug = true;// not allowed to do threads in github codespaces #########SET FALSE BEFORE BUILDING##########
 Console.WriteLine("Drop the Excel pls good sir");
 Console.WriteLine("Press Enter to continue");
 
@@ -24,38 +24,37 @@ do
 } while (input != "");
 
 var client = new HttpClient();
-
 string url = @"https://app.gaiia.com/iq-fiber/accounts/";
 
 foreach (Account a in accounts)
 {
+    // Display info to console
+    Console.Clear();
+    Console.WriteLine($"PROGRESS: {accounts.IndexOf(a) + 1} of {accounts.Count()}\n");
     string message = @$"Account Info:
+    #############################################
     {url + a.AccountNumber}
-    -----------------------------------------
+    #############################################
+
     NAME----------{a.FirstName} {a.LastName}
     ADDRESS-------{a.Address}
     INSTALL TIME--{a.InstallTime}
     SUBSCRIPTION--{a.Subsciption}";
-
-    Console.Clear();
     Console.WriteLine(message);
 
+    // Copy number to clipboard to paste in NICE
     string text = a.PhoneNumber;
-    if (!debug) // not allowed to do threads in github codespaces #########DISABLE FOR PRODUCTION##########
-    {
+    if (debug){
+        Console.WriteLine($"Output copied to clipboard:\n{text}");
+    } else {
         await ClipboardService.SetTextAsync(text);
     }
-    else
-    {
-        Console.WriteLine($"Output copied to clipboard: {text}");
-    }
 
-    Console.WriteLine(@"Resolution:
-    (1) Confirmed
-    (2) Voicemail");
+    // Copy note to leave in Gaiia account
+    Console.WriteLine("\nResolution:\n\t(1) Confirmed\n\t(2) Voicemail");
     int choice = getChoice(1, 2);
 
-#region Format account note
+    #region Format account note
     text = @"ISSUE: PRE-CALL
 	
 ACTION: 
@@ -68,10 +67,10 @@ ACTION:
             text += "Confirmed ";
             break;
         case 2:
-            text += "Left voicemail informing of";
+            text += "Left voicemail informing of ";
             break;
         default:
-            text += "Informed the customer of the";
+            text += "Informed the customer of the ";
             break;
     }
 
@@ -81,23 +80,41 @@ ACTION:
 *   {a.Subsciption}
 
 RESULT: Pending Installation";
-#endregion
+    #endregion
+
+    if (debug)
+    {
+        Console.WriteLine($"Output copied to clipboard:\n{text}");
+    }
+    else
+    {
+        await ClipboardService.SetTextAsync(text);
+    }
 
     Thread.Sleep(1000);
-    Console.WriteLine("\nPress Enter to continue");
-    Console.ReadLine();
+    Console.WriteLine("\nPress any key to continue");
+    Console.ReadKey();
 }
+Console.WriteLine("\n\nALL DONE: YIPEEE");
+Thread.Sleep(1000);
+Console.WriteLine("Press any key to exit");
+Console.ReadKey();
 
-Console.WriteLine("Press Enter to exit");
-Console.ReadLine();
+
 
 int getChoice(int choice1, int choice2)
 {
-    int choice;
+    int choice = -1;
     bool invalidChoice = true;
     do
     {
-        choice = int.Parse(Console.ReadLine() ?? $"-99999999");
+        try
+        {
+            choice = int.Parse(Console.ReadKey(true).KeyChar.ToString() ?? "-1");
+        }catch(Exception e)
+        {
+            Console.WriteLine("Whoopsie Tootsie: " + e.Message);
+        }
         if (choice == choice1 || choice == choice2)
         {
             invalidChoice = false;
@@ -108,10 +125,9 @@ int getChoice(int choice1, int choice2)
             Thread.Sleep(1000);
 
             // clear last message
-            Console.SetCursorPosition(0, 11);
+            Console.SetCursorPosition(0, 14);
             Console.WriteLine(new string(' ', 100));
-            Console.Write(new string(' ', 33));
-            Console.SetCursorPosition(0, 11);
+            Console.SetCursorPosition(0, 14);
         }
     } while (invalidChoice);
     return choice;
