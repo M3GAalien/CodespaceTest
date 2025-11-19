@@ -1,21 +1,35 @@
-﻿using System.Diagnostics;
+﻿using TextCopy;
 
-Console.WriteLine("View commercial (1) or Residential (2)");
-int choice = int.Parse(Console.ReadLine() ?? "0");
-if(choice == 0)
+Console.WriteLine("Drop the Excel pls good sir");
+Console.WriteLine("Press Enter to continue");
+
+string input;
+List<Account> accounts = new List<Account>();
+do
 {
-    Console.WriteLine("An error occured");
-    return;
+    input = Console.ReadLine() ?? "";
+    try
+    {
+        accounts.Add(new Account(input.Split("\t")));
+    }
+    catch (Exception e)
+    {
+        if (e.Message != "The input string '' was not in a correct format.")
+        {
+            Console.WriteLine("Oopsie Poopsies: " + e.Message);
+        }
+    }
+} while (input != "");
+
+var client = new HttpClient();
+
+string url = @"https://app.gaiia.com/iq-fiber/accounts/";
+
+foreach (Account a in accounts)
+{
+    Console.WriteLine($"Navigating to site:\n{url + a.AccountNumber}");
+    string text = $"Hello {a.FirstName}'s World!";
+    await ClipboardService.SetTextAsync(text);
+
+    Console.WriteLine($"Output copied to clipboard: {text}");
 }
-
-string url = "https://app.gaiia.com/iq-fiber/accounts?filters=%7B";
-string option = choice == 1 ? """\"customTypeIds"%3A%5B"6421ab73-c467-4f79-ac17-ba91ad3ee0c4"%5D%7D""" : """\"customTypeIds"%3A%5B"919285ef-deb8-4c1b-8fc9-e36f6eb00932"%5D%7D""";
-
-Process.Start(new ProcessStartInfo
-{
-    FileName = url + option,
-    UseShellExecute = true,
-    Verb = "open"
-});
-
-Console.ReadLine();
