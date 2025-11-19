@@ -32,7 +32,8 @@ foreach (Account a in accounts)
     await ClipboardService.SetTextAsync(text);
 
     Console.WriteLine($"Output copied to clipboard: {text}");
+    Thread.Sleep(1000);
 }
-int oneSecond = 1000;
-Thread.Sleep(oneSecond * 3);
+
+Console.WriteLine("Press Enter to exit");
 Console.ReadLine();
