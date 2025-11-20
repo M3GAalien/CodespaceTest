@@ -8,6 +8,7 @@ public class Account
     public string Address;
     public string InstallTime;
     public string? Resolution;
+    public string CXLorRS = "";
     public string Agent; 
 
     public Account(string[] accountInfo, string agent)

@@ -6,7 +6,7 @@ using TextCopy;
 
 bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
 bool slowMode = true; // add timed delays for *asthetic* reasons
-int delay = 1000; // delay to add in miliseconds
+int delay = 2000; // delay to add in miliseconds
 
 #region intro
 Console.WriteLine("this program does blah blah blah...");
@@ -191,9 +191,14 @@ int getChoice(int choice1, int choice2)
             if (slowMode) Thread.Sleep(delay);
 
             // clear last message
-            Console.SetCursorPosition(0, 14);
+            int lastCursorPosition = 14;
+            if (debug)
+            {
+                lastCursorPosition = 14;
+            }
+            Console.SetCursorPosition(0, lastCursorPosition);
             Console.WriteLine(new string(' ', 100));
-            Console.SetCursorPosition(0, 14);
+            Console.SetCursorPosition(0, lastCursorPosition);
         }
     } while (invalidChoice);
     return choice;
