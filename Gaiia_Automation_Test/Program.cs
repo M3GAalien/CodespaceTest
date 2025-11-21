@@ -3,8 +3,7 @@ using System.Reflection;
 using TextCopy;
 
 
-
-bool debug = true; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
+bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
 bool slowMode = true; // add timed delays for *asthetic* reasons
 int delay = 500; // delay to add in miliseconds
 
@@ -78,7 +77,6 @@ foreach (Account a in accounts)
     {
         results(debug, slowMode, delay, text);
     }
-
     #endregion
 
     #region Copy note to leave in Gaiia account
@@ -123,14 +121,17 @@ ACTION:
     *   {a.Subsciption}
 
 RESULT: Pending Installation";
-    #endregion
-
     results(debug, slowMode, delay, text);
+    #endregion
     #endregion
 
     #region Send an email if necessary
-    Console.WriteLine("Formatting email....");
-    text = @$"Hi {a.FirstName},
+    if (a.Resolution == "Emailed")
+    {
+        Console.WriteLine("Formatting email....");
+        if(slowMode) Thread.Sleep(delay);
+
+        text = @$"Hi {a.FirstName},
 Just wanted to confirm the details of your installation 
     Where : {a.Address},
     When  : {a.reformatedInstallTime}.
@@ -143,9 +144,8 @@ If you need to reschedule or have any questions, feel free to call us at 1-800-4
 We look forward to getting you connected!
  
 Best regards,";
-    if (slowMode) Thread.Sleep(delay);
-
-    results(debug, slowMode, delay, text);
+        results(debug, slowMode, delay, text);
+    }
     #endregion
 }
 
@@ -179,7 +179,6 @@ Console.WriteLine("\n\nALL DONE: YIPEEE");
 if (slowMode) Thread.Sleep(delay);
 Console.WriteLine("Press ENTER to exit");
 Console.ReadLine();
-
 
 
 // select a choice from 1 to range
