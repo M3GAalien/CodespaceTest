@@ -17,7 +17,7 @@ public class Account
         FirstName = accountInfo[1];
         LastName = accountInfo[2];
         PhoneNumber = accountInfo[3];
-        Subsciption = accountInfo[4];
+        Subsciption = reformatSubscription(accountInfo[4]);
         Address = accountInfo[5];
         InstallTime = accountInfo[6];
         Agent = agent;
@@ -67,13 +67,26 @@ public class Account
         {
             return "500Mbps. for $75/Month";
         }
-        if (plan.ToLower().Contains("1gig"))
+        if (plan.Contains("1"))
         {
             if (plan.ToLower().Contains("pro"))
             {
                 return "1 Gig. Pro for $150/Month";
             }
+            return "1 Gig. for $85/Month";
         }
-        return "";
+        if (plan.Contains("2"))
+        {
+            return "2 Gig. for $95/Month";
+        }
+        if (plan.Contains("5"))
+        {
+            if (plan.ToLower().Contains("pro"))
+            {
+                return "5 Gig. Pro for $250/Month";
+            }
+            return "5 Gig. for $125/Month";
+        }
+        return "PLEASE CHECK GAIIA FOR SUBSCRIPTION DETAILS";
     }
 }

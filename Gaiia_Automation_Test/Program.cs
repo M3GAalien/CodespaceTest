@@ -76,7 +76,7 @@ foreach (Account a in accounts)
     }
     else
     {
-        results(debug, text);
+        results(debug, slowMode, delay, text);
     }
 
     #endregion
@@ -98,8 +98,8 @@ foreach (Account a in accounts)
     text = @"ISSUE: PRE-CALL
 	
 ACTION: 
-*   Vetro ID verified & called the customer
-*   ";
+    Vetro ID verified & called the customer
+    ";
 
     switch (a.Resolution)
     {
@@ -118,14 +118,14 @@ ACTION:
     }
 
     text += $@"the installation details:
-*   {a.Address}
-*   {a.reformatedInstallTime()}
-*   {a.Subsciption}
+    *   {a.Address}
+    *   {a.reformatedInstallTime()}
+    *   {a.Subsciption}
 
 RESULT: Pending Installation";
     #endregion
 
-    results(debug, text);
+    results(debug, slowMode, delay, text);
     #endregion
 
     #region Send an email if necessary
@@ -134,7 +134,7 @@ RESULT: Pending Installation";
 Just wanted to confirm the details of your installation 
     Where : {a.Address},
     When  : {a.reformatedInstallTime}.
-    Plan  : SPEED for $PRICE/Mo.
+    Plan  : {a.Subsciption}.
 
 The technicians will call when they are on the way.
 Please make sure someone 18 or older is home for the full appointment, any pets are secured, and any gates needed for access are opened.
@@ -145,12 +145,8 @@ We look forward to getting you connected!
 Best regards,";
     if (slowMode) Thread.Sleep(delay);
 
-    results(debug, text);
+    results(debug, slowMode, delay, text);
     #endregion
-
-    if (slowMode) Thread.Sleep(delay);
-    Console.WriteLine("\nPress ENTER to continue");
-    Console.ReadLine();
 }
 
 #region Copy results to leave in Excel
@@ -230,7 +226,7 @@ int getChoice(int range)
     return choice;
 }
 
-async void results(bool isInDebugMode, string text)
+async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text)
 {
     if (isInDebugMode)
     {
@@ -241,4 +237,7 @@ async void results(bool isInDebugMode, string text)
         await ClipboardService.SetTextAsync(text);
         Console.WriteLine("\nCopied to clipboard!");
     }
+    if (isInSlowMode) Thread.Sleep(delay);
+    Console.WriteLine("\nPress ENTER to continue");
+    Console.ReadLine();
 }
