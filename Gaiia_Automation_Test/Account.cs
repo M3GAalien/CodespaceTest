@@ -37,11 +37,16 @@ public class Account
         string dayOfWeek = start.ToString("dddd");
         string month = start.ToString("MMM");
         string day = GetOrdinal(start.Day);
+        string timeWindow = start.Hour switch
+        {
+            < 11 => "8:00am - 11:00am",
+            >= 11 and < 14 => "11:00am - 2:00pm",
+            >= 14 and < 17 => "2:00pm - 5:00pm",
+            _ => "CHECK GAIIA"
 
-        string startTime = start.ToString("h:mmtt").ToLower();
-        string endTime = end.ToString("h:mmtt").ToLower();
+        };
 
-        return $"{dayOfWeek} {month}. {day}, {startTime} - {endTime}";
+        return $"{dayOfWeek} {month}. {day}, {timeWindow}";
     }
 
     private string GetOrdinal(int day)
@@ -50,5 +55,25 @@ public class Account
         if (day % 10 == 2 && day != 12) return day + "nd";
         if (day % 10 == 3 && day != 13) return day + "rd";
         return day + "th";
+    }
+
+    private string reformatSubscription(string plan)
+    {
+        if (plan.Contains("250"))
+        {
+            return "250Mbps. for $65/Month";
+        }
+        if (plan.Contains("500"))
+        {
+            return "500Mbps. for $75/Month";
+        }
+        if (plan.ToLower().Contains("1gig"))
+        {
+            if (plan.ToLower().Contains("pro"))
+            {
+                return "1 Gig. Pro for $150/Month";
+            }
+        }
+        return "";
     }
 }

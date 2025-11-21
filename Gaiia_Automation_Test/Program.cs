@@ -32,6 +32,11 @@ do
         if (e.Message != "The input string '' was not in a correct format.")
         {
             Console.WriteLine("Oopsie Poopsies: " + e.Message);
+            if (slowMode) Thread.Sleep(1000);
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
+            Console.WriteLine(new string(' ', Console.WindowWidth));
+            Console.WriteLine(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
         }
     }
 } while (input != "");
@@ -47,7 +52,7 @@ foreach (Account a in accounts)
     if (slowMode) Thread.Sleep(delay);
     Console.Clear();
     Console.WriteLine($"PROGRESS: {accounts.IndexOf(a) + 1} of {accounts.Count()}\n");
-    string message = @$"Account Info:
+    string text = @$"Account Info:
     #############################################
     {url + a.AccountNumber}
     #############################################
@@ -56,12 +61,13 @@ foreach (Account a in accounts)
     ADDRESS-------{a.Address}
     INSTALL TIME--{a.reformatedInstallTime()}
     SUBSCRIPTION--{a.Subsciption}";
-    Console.WriteLine(message);
+    Console.WriteLine(text);
     #endregion
 
     #region Copy number to clipboard to paste in NICE
+    Console.WriteLine("Getting phone number....");
     if (slowMode) Thread.Sleep(delay);
-    string text = a.PhoneNumber;
+    text = a.PhoneNumber;
 
     if (string.IsNullOrWhiteSpace(text))
     {
@@ -70,26 +76,25 @@ foreach (Account a in accounts)
     }
     else
     {
-
-        if (debug)
-        {
-            Console.WriteLine($"\n{text}");
-        }
-        else
-        {
-            await ClipboardService.SetTextAsync(text);
-            Console.WriteLine("\nPhone Number copied to clipboard!");
-        }
+        results(debug, text);
     }
 
     #endregion
 
     #region Copy note to leave in Gaiia account
     if (slowMode) Thread.Sleep(delay);
-    Console.WriteLine("\nResolution:\n   (1) Confirmed\n   (2) Voicemail");
-    a.Resolution = getChoice(1, 2) == 1 ? "Confirmed" : "Voicemail";
+    Console.WriteLine("\nResolution:\n   (1) Confirmed\n   (2) Voicemail\n   (3) Email");
+    a.Resolution = getChoice(3) switch
+    {
+        1 => "Confirmed",
+        2 => "Voicemail",
+        3 => "Emailed",
+        _ => "ERROR"
+    };
 
     #region Format account note
+    Console.WriteLine("Formating note for Gaiia....");
+    if (slowMode) Thread.Sleep(delay);
     text = @"ISSUE: PRE-CALL
 	
 ACTION: 
@@ -102,14 +107,17 @@ ACTION:
             text += "Confirmed ";
             break;
         case "Voicemail":
-            text += "Left voicemail informing of the ";
+            text += "Left voicemail informing of ";
+            break;
+        case "Emailed":
+            text += "Sent an email informing of ";
             break;
         default:
-            text += "Informed the customer of the ";
+            text += "Informed the customer of ";
             break;
     }
 
-    text += $@"installation details:
+    text += $@"the installation details:
 *   {a.Address}
 *   {a.reformatedInstallTime()}
 *   {a.Subsciption}
@@ -117,15 +125,27 @@ ACTION:
 RESULT: Pending Installation";
     #endregion
 
-    if (debug)
-    {
-        Console.WriteLine($"\n{text}");
-    }
-    else
-    {
-        await ClipboardService.SetTextAsync(text);
-    }
-    Console.WriteLine("\nGaiia note copied to clipboard!");
+    results(debug, text);
+    #endregion
+
+    #region Send an email if necessary
+    Console.WriteLine("Formatting email....");
+    text = @$"Hi {a.FirstName},
+Just wanted to confirm the details of your installation 
+    Where : {a.Address},
+    When  : {a.reformatedInstallTime}.
+    Plan  : SPEED for $PRICE/Mo.
+
+The technicians will call when they are on the way.
+Please make sure someone 18 or older is home for the full appointment, any pets are secured, and any gates needed for access are opened.
+ 
+If you need to reschedule or have any questions, feel free to call us at 1-800-495-4775.
+We look forward to getting you connected!
+ 
+Best regards,";
+    if (slowMode) Thread.Sleep(delay);
+
+    results(debug, text);
     #endregion
 
     if (slowMode) Thread.Sleep(delay);
@@ -166,8 +186,8 @@ Console.ReadLine();
 
 
 
-
-int getChoice(int choice1, int choice2)
+// select a choice from 1 to range
+int getChoice(int range)
 {
     int choice = -1;
     bool invalidChoice = true;
@@ -185,17 +205,17 @@ int getChoice(int choice1, int choice2)
             choice = -99;
         }
 
-        if (choice == choice1 || choice == choice2)
+        if (choice > 0 && choice <= range)
         {
             invalidChoice = false;
         }
         else
         {
             Console.WriteLine("Invalide choice: Please try again");
-            if (slowMode) Thread.Sleep(delay);
+            if (slowMode) Thread.Sleep(1000);
 
             int linesToErase = choice == -99 ? 2 : 1;
-            int errorStart = Console.CursorTop - linesToErase - 1;
+            int errorStart = Console.CursorTop - linesToErase - 1 < 0 ? 0 : Console.CursorTop - linesToErase - 1; //prevents negative value error
             Console.SetCursorPosition(0, errorStart);
 
             for (int i = 0; i <= linesToErase; i++)
@@ -208,4 +228,17 @@ int getChoice(int choice1, int choice2)
         }
     } while (invalidChoice);
     return choice;
+}
+
+async void results(bool isInDebugMode, string text)
+{
+    if (isInDebugMode)
+    {
+        Console.WriteLine($"\n{text}");
+    }
+    else
+    {
+        await ClipboardService.SetTextAsync(text);
+        Console.WriteLine("\nCopied to clipboard!");
+    }
 }
