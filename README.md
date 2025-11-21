@@ -1,6 +1,5 @@
 # CodespaceTest
 testing github codespaces
-Michael was here
 
 <details>
   <summary>Click to expand</summary>
