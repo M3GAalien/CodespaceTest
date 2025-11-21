@@ -1,7 +1,6 @@
 # CodespaceTest
 Testing github codespaces
 
-
 <details>
   <summary>Click to expand</summary>
 
