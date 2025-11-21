@@ -5,8 +5,8 @@ using TextCopy;
 
 
 bool debug = true; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
-bool slowMode = false; // add timed delays for *asthetic* reasons
-int delay = 2000; // delay to add in miliseconds
+bool slowMode = true; // add timed delays for *asthetic* reasons
+int delay = 500; // delay to add in miliseconds
 
 #region intro
 Console.WriteLine("this program does blah blah blah...");
@@ -171,12 +171,10 @@ int getChoice(int choice1, int choice2)
 {
     int choice = -1;
     bool invalidChoice = true;
-    
 
     do
     {
-        int errorTop = Console.CursorTop;
-        Console.Error.WriteLine(errorTop);
+
         try
         {
             choice = int.Parse(Console.ReadLine() ?? "-1");
@@ -196,28 +194,16 @@ int getChoice(int choice1, int choice2)
             Console.WriteLine("Invalide choice: Please try again");
             if (slowMode) Thread.Sleep(delay);
 
-            // clear last message
-            // int lastCursorPosition = 16;
-            // if (debug)
-            // {
-            //     lastCursorPosition = 13;
-            // }
-            // if (choice == -99) lastCursorPosition -= 1;
-            // Console.SetCursorPosition(0, lastCursorPosition);
-            // Console.WriteLine(new string(' ', 100));
-            // Console.WriteLine(new string(' ', 100));
-            // if (choice == -99) Console.WriteLine(new string(' ', 100));
-            // Console.SetCursorPosition(0, lastCursorPosition);
-            
             int linesToErase = choice == -99 ? 2 : 1;
+            int errorStart = Console.CursorTop - linesToErase - 1;
+            Console.SetCursorPosition(0, errorStart);
 
-            for (int i = 0; i < linesToErase + 1; i++)
+            for (int i = 0; i <= linesToErase; i++)
             {
-                Console.SetCursorPosition(0, errorTop + i);
                 Console.WriteLine(new string(' ', Console.WindowWidth));
             }
 
-            Console.SetCursorPosition(0, errorTop);
+            Console.SetCursorPosition(0, errorStart);
 
         }
     } while (invalidChoice);
