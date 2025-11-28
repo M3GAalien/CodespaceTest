@@ -3,9 +3,14 @@ using System.Reflection;
 using TextCopy;
 
 
-bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
+bool debug = true; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
 bool slowMode = true; // add timed delays for *asthetic* reasons
 int delay = 1000; // delay to add in miliseconds
+
+ConsoleColor notification = ConsoleColor.DarkGray;
+ConsoleColor error = ConsoleColor.DarkRed;
+ConsoleColor success = ConsoleColor.Green;
+
 
 #region intro
 Console.WriteLine("this program does blah blah blah...");
@@ -21,13 +26,16 @@ string input;
 List<Account> accounts = new List<Account>();
 do
 {
+    Console.ForegroundColor = notification;
     input = Console.ReadLine() ?? "";
     try
     {
+        Console.ForegroundColor = notification;
         accounts.Add(new Account(input.Split("\t"), agent));
     }
     catch (Exception e)
     {
+        Console.ForegroundColor = error;
         if (e.Message != "The input string '' was not in a correct format.")
         {
             Console.WriteLine("Oopsie Poopsies: " + e.Message);
@@ -38,6 +46,7 @@ do
             Console.SetCursorPosition(0, Console.CursorTop - 2);
         }
     }
+    Console.ResetColor();
 } while (input != "");
 #endregion
 
@@ -46,131 +55,135 @@ string url = @"https://app.gaiia.com/iq-fiber/accounts/";
 
 foreach (Account a in accounts)
 {
-    #region Display info to console
-    Console.WriteLine("Getting account....");
-    if (slowMode) Thread.Sleep(delay);
-    Console.Clear();
-
-    Console.WriteLine($"PROGRESS: {accounts.IndexOf(a) + 1} of {accounts.Count()}\n");
-    string text = "";
-    printAccountInfo(a, url);
-    #endregion
-
-    #region Copy number to clipboard to paste in NICE
-    Console.WriteLine("\nGetting phone number....");
-    if (slowMode) Thread.Sleep(delay);
-    text = a.PhoneNumber;
-
-    if (string.IsNullOrWhiteSpace(text))
+    do
     {
-        Console.WriteLine("\nError getting phone number." +
-                          "\nPlease use Gaiia to get the phone number");
-    }
-    else
-    {
-        results(debug, slowMode, delay, text);
-    }
-    #endregion
-
-    #region Copy note to leave in Gaiia account
-    if (slowMode) Thread.Sleep(delay);
-    Console.WriteLine("Resolution:");
-
-    // color choices
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("   (1) Confirmed");
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("   (2) Voicemail");
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("   (3) Email");
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine("   (4) Reschedule");
-    Console.ForegroundColor = ConsoleColor.DarkRed;
-    Console.WriteLine("   (5) Canceled");
-    Console.ResetColor();
-
-    int resolution = getChoice(5);
-    if (resolution <= 3)
-    {
-        a.Resolution = resolution switch
-        {
-            1 => "Confirmed",
-            2 => "Voicemail",
-            3 => "Emailed",
-            _ => "ERROR"
-        };
-    }
-    else
-    {
-        a.CXLorRS = resolution switch
-        {
-            4 => "Rescheduled",
-            5 => "Canceled",
-            _ => "ERROR"
-        };
-    }
-
-
-    #region Format account note
-    if (a.CXLorRS != "Rescheduled" && a.CXLorRS != "Canceled")
-    {
-        Console.WriteLine("Formating note for Gaiia....");
+        #region Display info to console
+        Console.WriteLine("Getting account....");
         if (slowMode) Thread.Sleep(delay);
-        text = @"ISSUE: PRE-CALL
-	
-ACTION: 
-    Vetro ID verified & called the customer
-    ";
+        Console.Clear();
 
-        switch (a.Resolution)
+        Console.WriteLine($"PROGRESS: {accounts.IndexOf(a) + 1} of {accounts.Count()}\n");
+        string text = "";
+        printAccountInfo(a, url);
+        #endregion
+
+        #region Copy phone number to clipboard to paste in NICE
+        Console.WriteLine("\nGetting phone number....");
+        if (slowMode) Thread.Sleep(delay);
+        text = a.PhoneNumber;
+
+        if (string.IsNullOrWhiteSpace(text))
         {
-            case "Confirmed":
-                text += "Confirmed ";
-                break;
-            case "Voicemail":
-                text += "Left voicemail informing of ";
-                break;
-            case "Emailed":
-                text += "Sent an email informing of ";
-                break;
-            default:
-                text += "Informed the customer of ";
-                break;
+            Console.ForegroundColor = error;
+            Console.WriteLine("\tError getting phone number." +
+                            "\n\tPlease use Gaiia to get the phone number");
+            Console.ResetColor();
+        }
+        else
+        {
+            results(debug, slowMode, delay, text);
+        }
+        #endregion
+
+        #region Copy note to leave in Gaiia account
+        Console.WriteLine("\nResolution:");
+
+        // color choices
+        Console.ForegroundColor = success;
+        Console.WriteLine("   (1) Confirmed");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("   (2) Voicemail");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("   (3) Email");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("   (4) Reschedule");
+        Console.ForegroundColor = error;
+        Console.WriteLine("   (5) Canceled");
+        Console.ResetColor();
+
+        int resolution = getChoice(5);
+        if (resolution <= 3)
+        {
+            a.Resolution = resolution switch
+            {
+                1 => "Confirmed",
+                2 => "Voicemail",
+                3 => "Emailed",
+                _ => "ERROR"
+            };
+        }
+        else
+        {
+            a.CXLorRS = resolution switch
+            {
+                4 => "Rescheduled",
+                5 => "Canceled",
+                _ => "ERROR"
+            };
         }
 
-        text += $@"the installation details:
-    *   {a.Address}
-    *   {a.reformatedInstallTime()}
-    *   {a.Subsciption}
+        #region Format account note
+        if (a.CXLorRS != "Rescheduled" && a.CXLorRS != "Canceled")
+        {
+            Console.WriteLine("Formating note for Gaiia....");
+            if (slowMode) Thread.Sleep(delay);
+            text = @"ISSUE: PRE-CALL
+
+ACTION: 
+Vetro ID verified & called the customer
+";
+
+            switch (a.Resolution)
+            {
+                case "Confirmed":
+                    text += "Confirmed ";
+                    break;
+                case "Voicemail":
+                    text += "Left voicemail informing of ";
+                    break;
+                case "Emailed":
+                    text += "Sent an email informing of ";
+                    break;
+                default:
+                    text += "Informed the customer of ";
+                    break;
+            }
+
+            text += $@"the installation details:
+*   {a.Address}
+*   {a.reformatedInstallTime()}
+*   {a.Subsciption}
 
 RESULT: Pending Installation";
-        results(debug, slowMode, delay, text);
+            results(debug, slowMode, delay, text);
+            #endregion
+        }
         #endregion
-    }
-    #endregion
 
-    #region Send an email if necessary
-    if (a.Resolution == "Emailed")
-    {
-        Console.WriteLine("Formatting email....");
-        if (slowMode) Thread.Sleep(delay);
+        #region Send an email if necessary
+        if (a.Resolution.Contains("Emailed"))
+        {
+            Console.WriteLine("Formatting email....");
+            if (slowMode) Thread.Sleep(delay);
 
-        text = @$"Hi {a.FirstName},
+            text = @$"Hi {a.FirstName},
 Just wanted to confirm the details of your installation 
-    Where : {a.Address},
-    When  : {a.reformatedInstallTime()}.
-    Plan  : {a.Subsciption}.
+Where : {a.Address},
+When  : {a.reformatedInstallTime()}.
+Plan  : {a.Subsciption}.
 
 The technicians will call when they are on the way.
 Please make sure someone 18 or older is home for the full appointment, any pets are secured, and any gates needed for access are opened.
- 
+
 If you need to reschedule or have any questions, feel free to call us at 1-800-495-4775.
 We look forward to getting you connected!
- 
+
 Best regards,";
-        results(debug, slowMode, delay, text);
-    }
-    #endregion
+            results(debug, slowMode, delay, text);
+        }
+        #endregion
+    } while (goBack());
+
 }
 
 #region Copy results to leave in Excel
@@ -199,7 +212,10 @@ Console.WriteLine("\nExcel output copied to clipboad.");
 #endregion
 
 if (slowMode) Thread.Sleep(delay);
-Console.WriteLine("\n\nALL DONE: YIPEEE");
+Console.ForegroundColor = success;
+Console.WriteLine("ALL DONE: YIPEEE");
+Console.ResetColor();
+
 if (slowMode) Thread.Sleep(delay);
 Console.WriteLine("Press ENTER to exit");
 Console.ReadLine();
@@ -220,6 +236,7 @@ int getChoice(int range)
         }
         catch (Exception e)
         {
+            Console.ForegroundColor = error;
             Console.WriteLine("Whoopsie Tootsie: " + e.Message);
             choice = -99;
         }
@@ -230,6 +247,7 @@ int getChoice(int range)
         }
         else
         {
+            Console.ForegroundColor = error;
             Console.WriteLine("Invalide choice: Please try again");
             if (slowMode) Thread.Sleep(1000);
 
@@ -245,6 +263,7 @@ int getChoice(int range)
             Console.SetCursorPosition(0, errorStart);
 
         }
+        Console.ResetColor();
     } while (invalidChoice);
     return choice;
 }
@@ -252,6 +271,7 @@ int getChoice(int range)
 // show results if in debug mode or send text straight to clipboard 
 async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text)
 {
+    Console.ForegroundColor = notification;
     if (isInDebugMode)
     {
         Console.WriteLine($"\n{text}");
@@ -259,22 +279,27 @@ async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text
     else
     {
         await ClipboardService.SetTextAsync(text);
+<<<<<<< HEAD
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.WriteLine("Copied to clipboard!");
         Console.ResetColor();
+=======
+        Console.WriteLine("Copied to clipboard!");
+>>>>>>> Michael
     }
-    if (isInSlowMode) Thread.Sleep(delay);
-    Console.WriteLine("\nPress ENTER to continue");
+    Console.ResetColor();
+    Console.WriteLine("Press ENTER to continue");
     Console.ReadLine();
 }
 
+// add colors when displaying account info
 void printAccountInfo(Account a, string url)
 {
 
-    ConsoleColor borderColor = ConsoleColor.DarkGray;
+    ConsoleColor borderColor = notification;
     ConsoleColor urlColor = ConsoleColor.Blue;
     ConsoleColor labelColor = ConsoleColor.Yellow;
-    ConsoleColor dashColor = ConsoleColor.DarkGray;
+    ConsoleColor dashColor = notification;
     ConsoleColor valueColor = ConsoleColor.Cyan;
 
     Console.WriteLine("Account Info:");
@@ -311,4 +336,15 @@ void printAccountInfo(Account a, string url)
         Console.WriteLine(value);
         Console.ResetColor();
     }
+}
+
+// check if need to change call resolution in Gaiia
+bool goBack()
+{
+    Console.WriteLine("Need to change resolution?");
+    Console.ForegroundColor = notification;
+    Console.WriteLine("     (1) NO");
+    Console.WriteLine("     (2) YES");
+    Console.ResetColor();
+    return getChoice(2) == 1 ? false : true;
 }
