@@ -279,13 +279,9 @@ async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text
     else
     {
         await ClipboardService.SetTextAsync(text);
-<<<<<<< HEAD
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.WriteLine("Copied to clipboard!");
         Console.ResetColor();
-=======
-        Console.WriteLine("Copied to clipboard!");
->>>>>>> Michael
     }
     Console.ResetColor();
     Console.WriteLine("Press ENTER to continue");
