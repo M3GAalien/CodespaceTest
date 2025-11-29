@@ -3,7 +3,7 @@ using System.Reflection;
 using TextCopy;
 
 
-bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
+bool debug = true; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
 bool slowMode = true; // add timed delays for *asthetic* reasons
 int delay = 1000; // delay to add in miliseconds
 
@@ -126,6 +126,7 @@ foreach (Account a in accounts)
 results(debug, slowMode, delay, excelOuput.ToString());
 #endregion
 
+#region outro
 Console.ForegroundColor = success;
 text = "ALL DONE: YIPEEE\n";
 typeText(text, slowMode);
@@ -133,6 +134,7 @@ Console.ResetColor();
 
 Console.WriteLine("Press ENTER to exit");
 Console.ReadLine();
+#endregion
 
 // select a choice from 1 to range
 int getChoice(int range)
@@ -363,8 +365,9 @@ Vetro ID verified & called the customer
 
 RESULT: Pending Installation";
         results(debug, slowMode, delay, text);
-        #endregion
     }
+    #endregion
+
     #endregion
 
     #region Send an email if necessary
@@ -428,10 +431,41 @@ void wellnessCheck(Account account)
             _ => "ERROR"
         };
     }
+
+    #region Format account note
+    string text = "";
+    if (account.WellnessCheckStatus != "Rescheduled" && account.WellnessCheckStatus != "Canceled")
+    {
+        text = "Formating note for Gaiia account....\n";
+        typeText(text, slowMode);
+        if (slowMode) Thread.Sleep(delay);
+        text = @"ISSUE: WELLNESS CHECK
+
+ACTION: ";
+
+        switch (account.WellnessCheckResolution)
+        {
+            case "Satisfied":
+                text += "Confirmed good ";
+                break;
+            case "Emailed + VM":
+                text += "Left voicemail and sent an email inquiring of";
+                break;
+            default:
+                text += "Requested feedback on ";
+                break;
+        }
+
+        text += $@"service
+
+RESULT: DONE";
+        results(debug, slowMode, delay, text);
+    }
+    #endregion
+
     #endregion
 
     #region Send an email if necessary
-    string text = "";
     if (account.WellnessCheckResolution.Contains("Emailed + VM"))
     {
         text = "Formatting email....\n";
