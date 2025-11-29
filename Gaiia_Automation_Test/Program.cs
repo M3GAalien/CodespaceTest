@@ -3,8 +3,8 @@ using System.Reflection;
 using TextCopy;
 
 
-bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
-bool slowMode = true; // add timed delays for *asthetic* reasons
+bool debug = true; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
+bool slowMode = false; // add timed delays for *asthetic* reasons
 int delay = 1000; // delay to add in miliseconds
 
 ConsoleColor notification = ConsoleColor.DarkGray;
@@ -279,6 +279,8 @@ bool goBack(string task, Account account)
                 account.WellnessCheckStatus = "";
                 break;
             default:
+                Console.ForegroundColor = error;
+                Console.WriteLine("An error occurred while removing results");
                 break;
         }
     }
