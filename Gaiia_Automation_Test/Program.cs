@@ -1,9 +1,10 @@
 ﻿using System.Text;
 using System.Reflection;
 using TextCopy;
+using System.Diagnostics;
 
 
-bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
+bool debug = true; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
 bool slowMode = true; // add timed delays for *asthetic* reasons
 int delay = 1000; // delay to add in miliseconds
 
@@ -69,40 +70,38 @@ foreach (Account a in accounts)
     Console.Clear();
 
     Console.WriteLine($"PROGRESS: {accounts.IndexOf(a) + 1} of {accounts.Count()}\n");
-    printAccountInfo(a, @"https://app.gaiia.com/iq-fiber/accounts/");
+    printAccountInfo(a);
     #endregion
 
-    #region Copy phone number to clipboard to paste in NICE
-    text = "\nGetting phone number....\n";
-    typeText(text, slowMode);
-    if (slowMode) Thread.Sleep(delay);
-    text = a.PhoneNumber;
-
-    if (string.IsNullOrWhiteSpace(text))
-    {
-        Console.ForegroundColor = error;
-        Console.WriteLine("\tError getting phone number." +
-                        "\n\tPlease use Gaiia to get the phone number");
-        Console.ResetColor();
-    }
-    else
-    {
-        results(debug, slowMode, delay, text);
-    }
-    #endregion
     do
     {
-        switch (task)
+        if (task.Contains("precall"))
         {
-            case "precall":
-                precall(a);
-                break;
-            case "wellness check":
-                wellnessCheck(a);
-                break;
-            default:
-                Console.WriteLine("Error processing request");
-                break;
+
+            #region Copy phone number to clipboard to paste in NICE
+            text = "\nGetting phone number....\n";
+            typeText(text, slowMode);
+            if (slowMode) Thread.Sleep(delay);
+            text = a.PhoneNumber;
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                Console.ForegroundColor = error;
+                Console.WriteLine("\tError getting phone number." +
+                                "\n\tPlease use Gaiia to get the phone number");
+                Console.ResetColor();
+            }
+            else
+            {
+                results(debug, slowMode, delay, text);
+            }
+            #endregion
+
+            precall(a);
+        }
+        else
+        {
+            wellnessCheck(a);
         }
     } while (goBack(task, a));
 }
@@ -203,7 +202,7 @@ async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text
 }
 
 // add colors when displaying account info
-void printAccountInfo(Account a, string url)
+void printAccountInfo(Account a)
 {
 
     ConsoleColor borderColor = notification;
@@ -216,7 +215,7 @@ void printAccountInfo(Account a, string url)
 
     writeBorder();
     Console.ForegroundColor = urlColor;
-    Console.WriteLine(url + a.AccountNumber);
+    Console.WriteLine(@"https://app.gaiia.com/iq-fiber/accounts/" + a.AccountNumber);
     Console.ResetColor();
     writeBorder();
 
@@ -392,94 +391,109 @@ void precall(Account account)
 // wellness check workflow
 void wellnessCheck(Account account)
 {
-    #region Copy note to leave in Gaiia
-    Console.WriteLine("\nResolution:");
-
-    // color choices
-    Console.ForegroundColor = success;
-    Console.WriteLine("   (1) Satisfied");
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("   (2) Emailed + VM");
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine("   (3) Rescheduled");
-    Console.ForegroundColor = error;
-    Console.WriteLine("   (4) Canceled");
-    Console.ResetColor();
-
-    int resolution = getChoice(4);
-    if (resolution <= 2)
+    string url = @"https://app.gaiia.com/iq-fiber/accounts/" + account.AccountNumber + "/tickets/new";
+    if (debug)
     {
-        account.WellnessCheckResolution = resolution switch
-        {
-            1 => "Satisfied",
-            2 => "Emailed + VM",
-            _ => "ERROR"
-        };
+        Console.WriteLine(url);
     }
     else
     {
-        account.WellnessCheckStatus = resolution switch
+        Process.Start(new ProcessStartInfo(url)
         {
-            3 => "Rescheduled",
-            4 => "Canceled",
-            _ => "ERROR"
-        };
+            UseShellExecute = true
+        });
     }
 
-    #region Format account note
-    string text = "";
-    if (account.WellnessCheckStatus != "Rescheduled" && account.WellnessCheckStatus != "Canceled")
-    {
-        text = "Formating note for Gaiia account....\n";
-        typeText(text, slowMode);
-        if (slowMode) Thread.Sleep(delay);
-        text = @"ISSUE: WELLNESS CHECK
 
-ACTION: ";
+    //     #region Copy note to leave in Gaiia
+    //     Console.WriteLine("\nResolution:");
 
-        switch (account.WellnessCheckResolution)
-        {
-            case "Satisfied":
-                text += "Confirmed good";
-                break;
-            case "Emailed + VM":
-                text += "Left voicemail & email inquiring of";
-                break;
-            default:
-                text += "Requested feedback on";
-                break;
-        }
+    //     // color choices
+    //     Console.ForegroundColor = success;
+    //     Console.WriteLine("   (1) Satisfied");
+    //     Console.ForegroundColor = ConsoleColor.Yellow;
+    //     Console.WriteLine("   (2) Emailed + VM");
+    //     Console.ForegroundColor = ConsoleColor.Red;
+    //     Console.WriteLine("   (3) Rescheduled");
+    //     Console.ForegroundColor = error;
+    //     Console.WriteLine("   (4) Canceled");
+    //     Console.ResetColor();
 
-        text += $@" install/service
+    //     int resolution = getChoice(4);
+    //     if (resolution <= 2)
+    //     {
+    //         account.WellnessCheckResolution = resolution switch
+    //         {
+    //             1 => "Satisfied",
+    //             2 => "Emailed + VM",
+    //             _ => "ERROR"
+    //         };
+    //     }
+    //     else
+    //     {
+    //         account.WellnessCheckStatus = resolution switch
+    //         {
+    //             3 => "Rescheduled",
+    //             4 => "Canceled",
+    //             _ => "ERROR"
+    //         };
+    //     }
 
-RESULT: DONE";
-        results(debug, slowMode, delay, text);
-    }
-    #endregion
+    //     #region Format account note
+    //     string text = "";
+    //     if (account.WellnessCheckStatus != "Rescheduled" && account.WellnessCheckStatus != "Canceled")
+    //     {
+    //         text = "Formating note for Gaiia account....\n";
+    //         typeText(text, slowMode);
+    //         if (slowMode) Thread.Sleep(delay);
+    //         text = @"ISSUE: WELLNESS CHECK
 
-    #endregion
+    // ACTION: ";
 
-    #region Send an email if necessary
-    if (account.WellnessCheckResolution.Contains("Emailed + VM"))
-    {
-        text = "Formatting email....\n";
+    //         switch (account.WellnessCheckResolution)
+    //         {
+    //             case "Satisfied":
+    //                 text += "Confirmed good";
+    //                 break;
+    //             case "Emailed + VM":
+    //                 text += "Left voicemail & email inquiring of";
+    //                 break;
+    //             default:
+    //                 text += "Requested feedback on";
+    //                 break;
+    //         }
 
-        try
-        {
-            text = File.ReadAllText("../Program/wellness_check_email.txt");
-        }
-        catch (Exception e)
-        {
-            Console.ForegroundColor = error;
-            Console.WriteLine(e.Message);
-            Console.ResetColor();
-        }
+    //         text += $@" install/service
 
-        text = replaceText(text, account);
-        results(debug, slowMode, delay, text);
+    // RESULT: DONE";
+    //         results(debug, slowMode, delay, text);
+    //     }
+    //     #endregion
 
-    }
-    #endregion
+    //     #endregion
+
+    //     #region Send an email if necessary
+    //     if (account.WellnessCheckResolution.Contains("Emailed + VM"))
+    //     {
+    //         text = "Formatting email....\n";
+
+    //         try
+    //         {
+    //             text = File.ReadAllText("../Program/wellness_check_email.txt");
+    //         }
+    //         catch (Exception e)
+    //         {
+    //             Console.ForegroundColor = error;
+    //             Console.WriteLine(e.Message);
+    //             Console.ResetColor();
+    //         }
+
+    //         text = replaceText(text, account);
+    //         results(debug, slowMode, delay, text);
+
+    //     }
+    //     #endregion
+
 }
 
 // types each character to terminal
