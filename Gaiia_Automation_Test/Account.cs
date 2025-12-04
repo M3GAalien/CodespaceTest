@@ -1,3 +1,5 @@
+namespace Gaiia_Automation_Test;
+
 public class Account
 {
     public int AccountNumber;

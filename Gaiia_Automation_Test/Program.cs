@@ -2,11 +2,15 @@
 using System.Reflection;
 using TextCopy;
 using System.Diagnostics;
+using Gaiia_Automation_Test;
+
 
 
 bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
 bool slowMode = true; // add timed delays for *asthetic* reasons
-int delay = 1000; // delay to add in miliseconds
+bool autoContinue = true; // auto continue to next prompt after delay.
+int delay = 2000; // delay to add in miliseconds
+
 
 ConsoleColor notification = ConsoleColor.DarkGray;
 ConsoleColor error = ConsoleColor.DarkRed;
@@ -20,7 +24,9 @@ string agent = debug ? "Michael A" : Console.ReadLine() ?? "NO NAME";
 
 text = "\nWe doing precalls or wellness checks?";
 typeText(text, slowMode);
+Console.ForegroundColor = notification;
 Console.WriteLine("\n     (1) - precall\n     (2) - wellness check");
+Console.ResetColor();
 string task = getChoice(2) switch
 {
     1 => "precall",
@@ -73,30 +79,15 @@ foreach (Account a in accounts)
     printAccountInfo(a);
     #endregion
 
+    if (task.Contains("wellness check"))
+    {
+        startWFNewTicket(a);
+    }
+
     do
     {
         if (task.Contains("precall"))
         {
-
-            #region Copy phone number to clipboard to paste in NICE
-            text = "\nGetting phone number....\n";
-            typeText(text, slowMode);
-            if (slowMode) Thread.Sleep(delay);
-            text = a.PhoneNumber;
-
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                Console.ForegroundColor = error;
-                Console.WriteLine("\tError getting phone number." +
-                                "\n\tPlease use Gaiia to get the phone number");
-                Console.ResetColor();
-            }
-            else
-            {
-                results(debug, slowMode, delay, text);
-            }
-            #endregion
-
             precall(a);
         }
         else
@@ -121,7 +112,7 @@ foreach (Account a in accounts)
     .Select(x => x.GetValue(a)?.ToString())) + "\n";
     excelOuput.Append(output);
 }
-results(debug, slowMode, delay, excelOuput.ToString());
+results(debug, excelOuput.ToString());
 #endregion
 
 #region outro
@@ -182,7 +173,7 @@ int getChoice(int range)
 }
 
 // show results if in debug mode or send text straight to clipboard 
-async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text)
+async void results(bool isInDebugMode, string text, bool autoContinue = false)
 {
     Console.ForegroundColor = notification;
     if (isInDebugMode)
@@ -196,7 +187,16 @@ async void results(bool isInDebugMode, bool isInSlowMode, int delay, string text
         Console.WriteLine("Copied to clipboard!");
         Console.ResetColor();
     }
+
     Console.ResetColor();
+    if (autoContinue)
+    {
+        Thread.Sleep(delay);
+        Console.WriteLine();
+        return;
+    }
+    ;
+
     Console.WriteLine("\nPress ENTER to continue");
     Console.ReadLine();
 }
@@ -290,6 +290,8 @@ bool goBack(string task, Account account)
 // precall workflow
 void precall(Account account)
 {
+    callCX(account);
+
     #region Copy note to leave in Gaiia
     typeText("\nResolution:\n", slowMode);
 
@@ -358,7 +360,7 @@ void precall(Account account)
                 "\n*\t{account.reformatedInstallTime()}" +
                 "\n*\t{account.Subsciption}" +
                 "\n\nRESULT: Pending Installation";
-        results(debug, slowMode, delay, text);
+        results(debug, text);
     }
     #endregion
 
@@ -383,7 +385,7 @@ void precall(Account account)
         }
 
         text = replaceText(text, account);
-        results(debug, slowMode, delay, text);
+        results(debug, text);
     }
     #endregion
 }
@@ -391,113 +393,211 @@ void precall(Account account)
 // wellness check workflow
 void wellnessCheck(Account account)
 {
-    string url = @"https://app.gaiia.com/iq-fiber/accounts/" + account.AccountNumber + "/tickets/new";
-    if (debug)
+    WellnessCheckForm form = new WellnessCheckForm();
+    #region fill out form
+    // Account status: Account is active and payment method is on file. 
+    autoOpenLink(@$"https://app.gaiia.com/iq-fiber/accounts/{account.AccountNumber}/billing/transactions");
+    string text = "Account Active\n";
+    typeText(text, slowMode);
+    Console.ForegroundColor = notification;
+    Console.WriteLine("\t(1) - YES\n\t(2) - NO");
+    Console.ResetColor();
+    form.accountIsActive = getChoice(2) == 1 ? true : false;
+
+    
+    text = "Payment method on file\n";
+    typeText(text, slowMode);
+    Console.ForegroundColor = notification;
+    Console.WriteLine("\t(1) - YES\n\t(2) - NO");
+    Console.ResetColor();
+    form.hasPaymentMethod = getChoice(2) == 1 ? true : false;
+
+    // Install triage: Wi-Fi Man is attached and Tech notes are completed.
+    autoOpenLink(@$"https://app.gaiia.com/iq-fiber/accounts/{account.AccountNumber}/work-orders");
+    text = "Wi-Fi Man\n";
+    typeText(text, slowMode);
+    Console.ForegroundColor = notification;
+    Console.WriteLine("\t(1) - YES\n\t(2) - NO");
+    Console.ResetColor();
+    form.hasWIFIMan = getChoice(2) == 1 ? true : false;
+
+    text = "Tech Notes\n";
+    typeText(text, slowMode);
+    Console.ForegroundColor = notification;
+    Console.WriteLine("\t(1) - YES\n\t(2) - NO");
+    Console.ResetColor();
+    form.hasTechNotes = getChoice(2) == 1 ? true : false;
+
+    // Light Levels:  “Good” Less than 21Dbs / “Borderline” between 21 and 24Dbs / “Bad” above 24Dbs. 
+    // Error on service: TX/RX errors, FEC errors or Multiple errors
+    autoOpenLink(@$"https://ponmon.iqfiber.com/ontstatus.php?serialnumber={account.AccountNumber}");
+    text = "Light Levels\n";
+    typeText(text, slowMode);
+    Console.ForegroundColor = notification;
+    Console.WriteLine("\t(1) - [Good] Less than 21Dbs" +
+                    "\n\t(2) - [Borderline] between 21 and 24Dbs" +
+                    "\n\t(3) - [Bad] above 24Dbs");
+    Console.ResetColor();
+    form.lightLevels = getChoice(3) switch
     {
-        Console.WriteLine(url);
+        1 => "Good",
+        2 => "Borderline",
+        3 => "Bad",
+        _ => "ERROR GETTING LIGHT LEVEL"
+    };
+
+    text = "Errors on Service\n";
+    typeText(text, slowMode);
+    Console.ForegroundColor = notification;
+    Console.WriteLine("\t(1) - None " +
+                    "\n\t(2) - TX/RX Errors" +
+                    "\n\t(3) - FEC Errors" +
+                    "\n\t(4) - Multiple Errors");
+    Console.ResetColor();
+    form.errorsOnService = getChoice(4) switch
+    {
+        1 => "None",
+        2 => "TX/RX Errors",
+        3 => "FEC Errors",
+        4 => "Multiple Errors",
+        _ => "ERROR GETTING ERRORS ON SERVICE"
+    };
+
+    // eero: Channel utilization, Average utilization and noise levels. 
+    autoOpenLink(@$"https://insight.eero.com/search?query={account.FirstName}%20{account.LastName}");
+
+    text = "Channel Utilization: ";
+    typeText(text, slowMode);
+    form.channelUtilization = Console.ReadLine() ?? "ERROR GETTING CHANNEL UTILIZATION\n";
+
+    text = "Average Utilization: ";
+    typeText(text, slowMode);
+    form.averageUtilization = Console.ReadLine() ?? "ERROR GETTING AVERAGE UTILIZATION\n";
+
+   text = "Noise Levels: ";
+    typeText(text, slowMode);
+    form.noiseLevel = Console.ReadLine() ?? "ERROR GETTING NOISE LEVEL\n";
+
+    callCX(account);
+
+    text = "Customer Feedback: ";
+    typeText(text, slowMode);
+    form.customerFeedback = Console.ReadLine() ?? "ERROR GETTING CUSTOMER FEEDBACK\n";
+    #endregion
+
+    #region resolution
+    Console.WriteLine("\nResolution:");
+
+    // color choices
+    Console.ForegroundColor = success;
+    Console.WriteLine("   (1) Satisfied");
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("   (2) Emailed + VM");
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine("   (3) Service Call");
+    Console.WriteLine("   (4) Rescheduled");
+    Console.ForegroundColor = error;
+    Console.WriteLine("   (5) Canceled");
+    Console.ResetColor();
+
+    int resolution = getChoice(5);
+    if (resolution <= 2)
+    {
+        account.WellnessCheckResolution = resolution switch
+        {
+            1 => "Satisfied",
+            2 => "Emailed + VM",
+            _ => "ERROR"
+        };
     }
     else
     {
-        Process.Start(new ProcessStartInfo(url)
+        account.WellnessCheckStatus = resolution switch
         {
-            UseShellExecute = true
-        });
+            3 => "Service Call",
+            4 => "Rescheduled",
+            5 => "Canceled",
+            _ => "ERROR"
+        };
+    }
+    #endregion
+
+    #region fill out internal comment
+    if (account.WellnessCheckStatus != "Rescheduled" && account.WellnessCheckStatus != "Canceled")
+    {
+        text = "Formating note for Gaiia ticket....\n";
+        typeText(text, slowMode);
+        if (slowMode) Thread.Sleep(delay);
+
+        text = @$"ISSUE: INSTALL WELLNESS CHECK
+Account status:
+*   {(form.accountIsActive == true ? "ACTIVE" : "INACTIVE")}
+*   {(form.hasPaymentMethod == true ? "Payment method on file" : "No payment on file")}
+
+Triage:
+WORKORDER
+*   has Wi-Fi Man: {(form.hasWIFIMan == true ? "Yes" : "No")}
+*   has tech notes: {(form.hasTechNotes == true ? "Yes" : "No")}
+
+PONMON
+*   Light Levels: {form.lightLevels}
+*   Errors on Service: {form.errorsOnService}
+
+ROUTER
+*   Channel Utilization: {form.channelUtilization}
+*   Average Utilization: {form.averageUtilization}
+*   Noise Level: {form.noiseLevel}
+
+CUSTOMER FEEDBACK
+*   {form.customerFeedback}
+
+RESULT: DONE";
+
+        results(debug, text);
+    }
+    #endregion
+
+    #region fill out external comment
+    text = $"Hello {account.FirstName},\n";
+    if (account.WellnessCheckResolution.Contains("Satisfied"))
+    {
+        text += @"It was a pleasure speaking with you today.
+Thank you for sharing your feedback on the installation—we truly appreciate your input. 
+Please know that our team is available 24/7 should you need any assistance or support in the future. 
+You can reach us anytime by creating a new ticket in the customer portal or by phone.
+
+Have a wonderful day!";
     }
 
+    if (account.WellnessCheckResolution.Contains("Emailed + VM"))
+    {
+        text += @"Welcome to the Fiberhood!
+Unfortunately, it appears we were unable to reach you via phone call to hear about your 
+installation experience with us and ensure your service is living up to our high expectations. 
+Please know that our team is available 24/7 should you need any assistance or support. 
 
-    //     #region Copy note to leave in Gaiia
-    //     Console.WriteLine("\nResolution:");
+Have a wonderful day!";
+    }
 
-    //     // color choices
-    //     Console.ForegroundColor = success;
-    //     Console.WriteLine("   (1) Satisfied");
-    //     Console.ForegroundColor = ConsoleColor.Yellow;
-    //     Console.WriteLine("   (2) Emailed + VM");
-    //     Console.ForegroundColor = ConsoleColor.Red;
-    //     Console.WriteLine("   (3) Rescheduled");
-    //     Console.ForegroundColor = error;
-    //     Console.WriteLine("   (4) Canceled");
-    //     Console.ResetColor();
+    if (account.WellnessCheckStatus.Contains("Service Call"))
+    {
+        text += @"It was a pleasure speaking with you today.
+Thank you for sharing your feedback on the installation—we truly appreciate your input. 
+We are disappointed to hear about those challenges with your new service, and are dedicated
+to addressing these concerns.
 
-    //     int resolution = getChoice(4);
-    //     if (resolution <= 2)
-    //     {
-    //         account.WellnessCheckResolution = resolution switch
-    //         {
-    //             1 => "Satisfied",
-    //             2 => "Emailed + VM",
-    //             _ => "ERROR"
-    //         };
-    //     }
-    //     else
-    //     {
-    //         account.WellnessCheckStatus = resolution switch
-    //         {
-    //             3 => "Rescheduled",
-    //             4 => "Canceled",
-    //             _ => "ERROR"
-    //         };
-    //     }
+As the next step, a follow-up appointment with a technician has been scheduled.
+We appreciate the opportunity to make this right and look forward to resolving your issue.
 
-    //     #region Format account note
-    //     string text = "";
-    //     if (account.WellnessCheckStatus != "Rescheduled" && account.WellnessCheckStatus != "Canceled")
-    //     {
-    //         text = "Formating note for Gaiia account....\n";
-    //         typeText(text, slowMode);
-    //         if (slowMode) Thread.Sleep(delay);
-    //         text = @"ISSUE: WELLNESS CHECK
-
-    // ACTION: ";
-
-    //         switch (account.WellnessCheckResolution)
-    //         {
-    //             case "Satisfied":
-    //                 text += "Confirmed good";
-    //                 break;
-    //             case "Emailed + VM":
-    //                 text += "Left voicemail & email inquiring of";
-    //                 break;
-    //             default:
-    //                 text += "Requested feedback on";
-    //                 break;
-    //         }
-
-    //         text += $@" install/service
-
-    // RESULT: DONE";
-    //         results(debug, slowMode, delay, text);
-    //     }
-    //     #endregion
-
-    //     #endregion
-
-    //     #region Send an email if necessary
-    //     if (account.WellnessCheckResolution.Contains("Emailed + VM"))
-    //     {
-    //         text = "Formatting email....\n";
-
-    //         try
-    //         {
-    //             text = File.ReadAllText("../Program/wellness_check_email.txt");
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             Console.ForegroundColor = error;
-    //             Console.WriteLine(e.Message);
-    //             Console.ResetColor();
-    //         }
-
-    //         text = replaceText(text, account);
-    //         results(debug, slowMode, delay, text);
-
-    //     }
-    //     #endregion
+Have a wonderful day!";
+    }
+    results(debug, text);
+    #endregion
 
 }
 
 // types each character to terminal
-void typeText(string text, bool slowMode)
+void typeText(string text, bool slowMode = true)
 {
     if (slowMode)
     {
@@ -526,5 +626,56 @@ string replaceText(string text, Account account)
     return text;
 }
 
+void autoOpenLink(string url)
+{
+    if (debug)
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine("\n" + url);
+        Console.ResetColor();
+    }
+    else
+    {
+        Process.Start(new ProcessStartInfo(url)
+        {
+            UseShellExecute = true
+        });
+    }
+}
 
+void callCX(Account account)
+{
+    text = "\nGetting phone number....\n";
+    typeText(text, slowMode);
+    if (slowMode) Thread.Sleep(delay);
+    text = account.PhoneNumber;
 
+    if (string.IsNullOrWhiteSpace(text))
+    {
+        Console.ForegroundColor = error;
+        Console.WriteLine("\tError getting phone number." +
+                        "\n\tPlease use Gaiia to get the phone number");
+        Console.ResetColor();
+    }
+    else
+    {
+        results(debug, text);
+    }
+}
+
+void startWFNewTicket(Account account)
+{
+    autoOpenLink(@"https://app.gaiia.com/iq-fiber/accounts/" + account.AccountNumber + "/tickets/new");
+
+    typeText("Getting ticket title....\n", slowMode);
+    results(debug, "Technical Support", autoContinue);
+
+    typeText("Getting ticket description....\n", slowMode);
+    results(debug, "Install Wellness", autoContinue);
+
+    typeText("Getting ticket assigned users....\n", slowMode);
+    results(debug, agent, autoContinue);
+
+    typeText("Getting ticket category....\n", slowMode);
+    results(debug, "CA - Order Assistance", autoContinue);
+}
