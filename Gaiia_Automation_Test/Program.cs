@@ -525,7 +525,7 @@ void wellnessCheck(Account account)
     #region fill out internal comment
     if (account.WellnessCheckStatus != "Rescheduled" && account.WellnessCheckStatus != "Canceled")
     {
-        text = "Formating note for Gaiia ticket....\n";
+        text = "Formating interneal note for Gaiia ticket....\n";
         typeText(text, slowMode);
         if (slowMode) Thread.Sleep(delay);
 
@@ -558,6 +558,10 @@ RESULT: DONE";
     #endregion
 
     #region fill out external comment
+    text = "Formating external note for Gaiia ticket....\n";
+        typeText(text, slowMode);
+        if (slowMode) Thread.Sleep(delay);
+
     text = $"Hello {account.FirstName},\n";
     if (account.WellnessCheckResolution.Contains("Satisfied"))
     {
