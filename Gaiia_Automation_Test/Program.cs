@@ -18,14 +18,14 @@ ConsoleColor success = ConsoleColor.Green;
 
 
 #region intro
-string text = "this program does blah blah blah...\nyour name pls: ";
+string text = "Checkout my github for documentation\n\n## https://github.com/M3GAalien/CodespaceTest ##\n\nPlease enter your name: ";
 typeText(text, slowMode);
 string agent = debug ? "Michael A" : Console.ReadLine() ?? "NO NAME";
 
-text = "\nWe doing precalls or wellness checks?";
+text = "\nSelect workflow";
 typeText(text, slowMode);
 Console.ForegroundColor = notification;
-Console.WriteLine("\n     (1) - precall\n     (2) - wellness check");
+Console.WriteLine("\n     (1) - Precall\n     (2) - Wellness Check");
 Console.ResetColor();
 string task = getChoice(2) switch
 {
@@ -37,7 +37,7 @@ string task = getChoice(2) switch
 
 #region get info from Excel
 if (slowMode) Thread.Sleep(delay);
-text = "\nDrop the Excel pls good sir then press Enter to continue\n";
+text = "\nPaste Excel data and press enter to continue:\n";
 typeText(text, slowMode);
 
 List<Account> accounts = new List<Account>();
@@ -81,7 +81,7 @@ foreach (Account a in accounts)
 
     if (task.Contains("wellness check"))
     {
-        startWFNewTicket(a);
+        createNewTicket(a);
     }
 
     do
@@ -290,6 +290,8 @@ bool goBack(string task, Account account)
 // precall workflow
 void precall(Account account)
 {
+    autoOpenLink(@$"https://app.gaiia.com/iq-fiber/accounts/{account.AccountNumber}");
+    
     callCX(account);
 
     #region Copy note to leave in Gaiia
@@ -404,7 +406,7 @@ void wellnessCheck(Account account)
     Console.ResetColor();
     form.accountIsActive = getChoice(2) == 1 ? true : false;
 
-
+    
     text = "Payment method on file\n";
     typeText(text, slowMode);
     Console.ForegroundColor = notification;
@@ -474,7 +476,7 @@ void wellnessCheck(Account account)
     typeText(text, slowMode);
     form.averageUtilization = Console.ReadLine() ?? "ERROR GETTING AVERAGE UTILIZATION\n";
 
-    text = "Noise Levels: ";
+   text = "Noise Levels: ";
     typeText(text, slowMode);
     form.noiseLevel = Console.ReadLine() ?? "ERROR GETTING NOISE LEVEL\n";
 
@@ -559,8 +561,8 @@ RESULT: DONE";
 
     #region fill out external comment
     text = "Formating external note for Gaiia ticket....\n";
-    typeText(text, slowMode);
-    if (slowMode) Thread.Sleep(delay);
+        typeText(text, slowMode);
+        if (slowMode) Thread.Sleep(delay);
 
     text = $"Hello {account.FirstName},\n";
     if (account.WellnessCheckResolution.Contains("Satisfied"))
@@ -667,7 +669,7 @@ void callCX(Account account)
     }
 }
 
-void startWFNewTicket(Account account)
+void createNewTicket(Account account)
 {
     autoOpenLink(@"https://app.gaiia.com/iq-fiber/accounts/" + account.AccountNumber + "/tickets/new");
 
