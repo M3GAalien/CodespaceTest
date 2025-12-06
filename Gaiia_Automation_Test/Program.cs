@@ -397,9 +397,8 @@ void precall(Account account)
         if (!debug)
         {
             string mailto = $"mailto:{to}?subject={subject}&body={text}";
-            Process.Start(new ProcessStartInfo
+            Process.Start(new ProcessStartInfo(mailto)
             {
-                FileName = mailto,
                 UseShellExecute = true
             });
         }
