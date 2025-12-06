@@ -155,8 +155,19 @@ https://github.com/user-attachments/assets/7f45c960-e453-49ff-b295-fa04fe781192
 28. At the end of the workflow, paste the generated results into the **Daily Excel SP** spreadsheet.
 </details>
 
+---
+
+## How to Download and Run
+1. Click the green code button.
+2. Select Download zip.
+3. Extract file
+4. Open extracted file
+5. Open Program folder
+6. Run Gaiia_Automation_Test.exe
+
 
 ---
+
 
 <details>
   <summary>Command to auto publish and commit code</summary>
