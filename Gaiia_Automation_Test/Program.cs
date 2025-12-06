@@ -290,8 +290,6 @@ bool goBack(string task, Account account)
 // precall workflow
 void precall(Account account)
 {
-    autoOpenLink(@$"https://app.gaiia.com/iq-fiber/accounts/{account.AccountNumber}");
-
     callCX(account);
 
     #region Copy note to leave in Gaiia
