@@ -371,11 +371,6 @@ void precall(Account account)
     #region Send an email if necessary
     if (account.Resolution.Contains("Emailed"))
     {
-
-        text = "Enter customers email\n";
-        typeText(text, slowMode);
-        Console.ForegroundColor = notification;
-
         text = "Formatting email....\n";
         typeText(text, slowMode);
         if (slowMode) Thread.Sleep(delay);
@@ -392,14 +387,7 @@ void precall(Account account)
         }
 
         text = replaceText(text, account);
-        if (debug)
-        {
-            typeText(text, slowMode);
-        }
-        else
-        {
-            // auto generage an email
-        }
+        results(debug, text);
     }
     #endregion
 }
