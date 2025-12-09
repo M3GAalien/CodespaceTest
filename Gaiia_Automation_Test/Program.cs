@@ -674,7 +674,7 @@ void createNewTicket(Account account)
     autoOpenLink(@"https://app.gaiia.com/iq-fiber/accounts/" + account.AccountNumber + "/tickets/new");
 
     typeText("Getting ticket title....\n", slowMode);
-    results(debug, "Technical Support", autoContinue);
+    results(debug, "Welcome to the Fiberhood!", autoContinue);
 
     typeText("Getting ticket description....\n", slowMode);
     results(debug, "Install Wellness", autoContinue);
