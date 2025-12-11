@@ -6,7 +6,7 @@ using Gaiia_Automation_Test;
 
 
 
-bool debug = false; // SET FALSE BEFORE BUILDING - not allowed to do threads in github codespaces 
+bool debug = false;
 bool slowMode = true; // add timed delays for *asthetic* reasons
 bool autoContinue = false; // auto continue to next prompt after delay.
 int delay = 2000; // delay to add in miliseconds
@@ -18,8 +18,39 @@ ConsoleColor success = ConsoleColor.Green;
 
 
 #region intro
-string text = "Checkout my github for documentation\n\n## https://github.com/M3GAalien/CodespaceTest ##\n\nPlease enter your name: ";
+string text = "Checkout my github for documentation\n\n## https://github.com/M3GAalien/CodespaceTest ##";
 typeText(text, slowMode);
+
+typeText("\n\nPress ENTER to continue ", slowMode);
+
+// enter secret extra options
+string otherOptions = Console.ReadLine() ?? "ERROR READING INPUT";
+
+if (otherOptions != "")
+{
+    Console.ForegroundColor = notification;
+    if (otherOptions.Contains('1'))
+    {
+        slowMode = false;
+        text = "SLOW MODE OFF\n";
+        typeText(text, slowMode);
+    }
+    if (otherOptions.Contains('2'))
+    {
+        debug = true;
+        text = "DEBUG MODE ON\n";
+        typeText(text, slowMode);
+    }
+    if (otherOptions.Contains('3'))
+    {
+        autoContinue = true;
+        text = "AUTO CONTINUE ON\n";
+        typeText(text, slowMode);
+    }
+}
+Console.ResetColor();
+
+typeText("\nPlease enter your full name\n");
 string agent = debug ? "Michael A" : Console.ReadLine() ?? "NO NAME";
 
 text = "\nSelect workflow";
@@ -37,7 +68,7 @@ string task = getChoice(2) switch
 
 #region get info from Excel
 if (slowMode) Thread.Sleep(delay);
-text = "\nPaste Excel data and press enter to continue:\n";
+text = "\nPaste Excel data then press ENTER to continue:\n";
 typeText(text, slowMode);
 
 List<Account> accounts = new List<Account>();
@@ -121,7 +152,7 @@ text = "ALL DONE: YIPEEE\n";
 typeText(text, slowMode);
 Console.ResetColor();
 
-Console.WriteLine("Press ENTER to exit");
+typeText("Press ENTER to exit", slowMode);
 Console.ReadLine();
 #endregion
 
@@ -195,10 +226,9 @@ async void results(bool isInDebugMode, string text, bool autoContinue = false)
         Console.WriteLine();
         return;
     }
-    ;
-
+    
     Console.WriteLine("\nPress ENTER to continue");
-    Console.ReadLine();
+    Console.ResetColor();
 }
 
 // add colors when displaying account info
@@ -416,7 +446,7 @@ void wellnessCheck(Account account)
         Console.ResetColor();
 
         account.WellnessCheckStatus = getChoice(2) == 1 ? "Rescheduled" : "Cancelled";
-        
+
         text = "Formating internal note for Gaiia ticket....\n";
         typeText(text, slowMode);
 
